@@ -34,27 +34,21 @@ else
     echo "python3: MISSING"
     fail=1
 fi
-if python3 -c "import tkinter" 2>/dev/null; then
-    echo "tkinter: OK"
-else
-    echo "tkinter: MISSING (system package or nix env needed)"
-    fail=1
-fi
-if python3 -c "import evdev" 2>/dev/null; then
-    echo "evdev: OK"
-else
-    echo "evdev: MISSING (hotkey listener and real clicks need it)"
-    fail=1
-fi
+SYS_TK=0; SYS_EVDEV=0
+python3 -c "import tkinter" 2>/dev/null && SYS_TK=1
+python3 -c "import evdev" 2>/dev/null && SYS_EVDEV=1
+[ "$SYS_TK" -eq 1 ] && echo "tkinter: OK" || echo "tkinter: MISSING from system python"
+[ "$SYS_EVDEV" -eq 1 ] && echo "evdev: OK" || echo "evdev: MISSING from system python"
 test -w /dev/uinput 2>/dev/null \
     && echo "uinput: WRITABLE (real clicks OK)" \
     || echo "uinput: not writable (dry-run mode, see README)"
 
-if [ "$fail" -ne 0 ]; then
+if have nix-shell; then
+    echo "nix-shell: OK (launcher will use the Nix env)"
+elif [ "$fail" -ne 0 ] || [ "$SYS_TK" -ne 1 ] || [ "$SYS_EVDEV" -ne 1 ]; then
     echo
-    echo "Missing dependencies. Easiest fix: use the Nix shell"
-    echo "  nix-shell shell.nix --run \"python3 main.py\""
-    echo "or: nix develop --command python3 main.py"
+    echo "Missing dependencies and no nix-shell. Easiest fix: install Nix,"
+    echo "then re-run ./install.sh (or: nix develop --command python3 main.py)"
     exit 1
 fi
 
@@ -66,12 +60,18 @@ fi
 mkdir -p "$CONFIG_DIR"
 chmod 700 "$CONFIG_DIR"
 mkdir -p "$DESKTOP_DIR"
+if NIX_SHELL="$(command -v nix-shell 2>/dev/null)"; then
+    LAUNCHER="$NIX_SHELL $REPO/shell.nix --run \"python3 main.py\""
+else
+    LAUNCHER="python3 $REPO/main.py"
+    echo "warning: no nix-shell found, launcher uses system python3"
+fi
 cat > "$DESKTOP_DIR/sabiclick.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=SabiClick
 Comment=Wayland auto-clicker
-Exec=python3 $REPO/main.py
+Exec=$LAUNCHER
 Path=$REPO
 Terminal=false
 Categories=Utility;
