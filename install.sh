@@ -70,7 +70,9 @@ cat > "$DESKTOP_DIR/sabiclick.desktop" <<EOF
 [Desktop Entry]
 Type=Application
 Name=SabiClick
+GenericName=Auto Clicker
 Comment=Wayland auto-clicker
+Keywords=Auto Clicker;Autoclicker;Clicker;Mouse;
 Exec=$LAUNCHER
 Path=$REPO
 Terminal=false
