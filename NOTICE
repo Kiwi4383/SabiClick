@@ -1,0 +1,11 @@
+SabiClick 2.1
+Copyright (c) 2026 Sabrina
+SPDX-License-Identifier: BSD-0-Clause
+License: BSD Zero Clause — see LICENSE.
+
+Original implementation with a familiar layout.
+No affiliation with OP Auto Clicker or its authors.
+Original layout and text, original functionality via /dev/uinput + evdev.
+Uses system Tkinter and evdev (see shell.nix).
+BSD-0 chosen deliberately (same as Elun- and aur-guard); SPDX headers
+added in SabiClick even though Elun- does not use them.
